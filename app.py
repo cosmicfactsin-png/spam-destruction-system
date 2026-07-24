@@ -59,7 +59,9 @@ if st.button("Execute Hack & Analyze 🚀"):
                 part1 = "AQ.Ab8RN6K4ufbUy_"
                 part2 = "tcStkFCbiqPqdGROmM_tFWRAfEV1MQWsz43A"
                 genai.configure(api_key=part1 + part2)
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                
+                # FIXED: Changed from 'gemini-1.5-flash' to 'gemini-pro' to resolve the 404 error
+                model = genai.GenerativeModel('gemini-pro')
                 
                 secret_prompt = f"""
                 You are a smart Cybersecurity AI. Analyze the text and return ONLY valid JSON format.
