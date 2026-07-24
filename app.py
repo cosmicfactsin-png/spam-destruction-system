@@ -60,12 +60,13 @@ if st.button("Execute Hack & Analyze 🚀"):
                 part2 = "tcStkFCbiqPqdGROmM_tFWRAfEV1MQWsz43A"
                 genai.configure(api_key=part1 + part2)
                 
-                # AUTO-DETECT LOGIC: Finds the correct model dynamically!
-                working_model = 'gemini-1.0-pro' # Safe fallback
+                # FIXED AUTO-DETECT LOGIC: Skips the restricted '2.5' models!
+                working_model = 'gemini-1.5-flash' # Safe fallback
                 for m in genai.list_models():
                     if 'generateContent' in m.supported_generation_methods:
-                        working_model = m.name
-                        break
+                        if '2.5' not in m.name:  # This skips the locked model
+                            working_model = m.name
+                            break
                         
                 model = genai.GenerativeModel(working_model)
                 
