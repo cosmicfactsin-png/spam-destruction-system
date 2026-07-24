@@ -60,8 +60,8 @@ if st.button("Execute Hack & Analyze 🚀"):
                 part2 = "yVWzJwEWJWezaRx8_-fsrJL4RWLEvAkpz0Zw"
                 genai.configure(api_key=part1 + part2)
                 
-                # FIXED: Strictly locked to the universally free model. No auto-detect loops.
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                # FIXED: Explicitly added 'models/' prefix to bypass API v1beta routing issue
+                model = genai.GenerativeModel('models/gemini-1.5-flash')
                 
                 secret_prompt = f"""
                 You are a smart Cybersecurity AI. Analyze the text and return ONLY valid JSON format.
