@@ -60,15 +60,8 @@ if st.button("Execute Hack & Analyze 🚀"):
                 part2 = "yVWzJwEWJWezaRx8_-fsrJL4RWLEvAkpz0Zw"
                 genai.configure(api_key=part1 + part2)
                 
-                # FIXED AUTO-DETECT LOGIC: Skips the restricted '2.5' models!
-                working_model = 'gemini-1.5-flash' # Safe fallback
-                for m in genai.list_models():
-                    if 'generateContent' in m.supported_generation_methods:
-                        if '2.5' not in m.name:  # This skips the locked model
-                            working_model = m.name
-                            break
-                        
-                model = genai.GenerativeModel(working_model)
+                # FIXED: Strictly locked to the universally free model. No auto-detect loops.
+                model = genai.GenerativeModel('gemini-1.5-flash')
                 
                 secret_prompt = f"""
                 You are a smart Cybersecurity AI. Analyze the text and return ONLY valid JSON format.
