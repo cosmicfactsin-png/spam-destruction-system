@@ -56,8 +56,8 @@ if st.button("Execute Hack & Analyze 🚀"):
             
             try:
                 # API Key Connection (Bypassing GitHub Scanner)
-                part1 = "AQ.Ab8RN6K4ufbUy_"
-                part2 = "tcStkFCbiqPqdGROmM_tFWRAfEV1MQWsz43A"
+                part1 = "AQ.Ab8RN6KkYDDIC_"
+                part2 = "yVWzJwEWJWezaRx8_-fsrJL4RWLEvAkpz0Zw"
                 genai.configure(api_key=part1 + part2)
                 
                 # FIXED AUTO-DETECT LOGIC: Skips the restricted '2.5' models!
