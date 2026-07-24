@@ -2,17 +2,15 @@ import streamlit as st
 import google.generativeai as genai
 import json
 import time
-import random
 
 # 1. Professional Setup 
 st.set_page_config(page_title="Spam Destruction System", page_icon="🕵️‍♂️", layout="centered")
 
-# Initialize Session State to remember the report when changing languages
 if 'show_report' not in st.session_state:
     st.session_state.show_report = False
     st.session_state.ai_data = None
 
-# 2. Light & Professional CSS Theme with Animations
+# 2. Light & Professional CSS Theme
 st.markdown("""
     <style>
     .stApp { background-color: #F4F6F9; color: #333333; }
@@ -52,16 +50,16 @@ if st.button("Execute Hack & Analyze 🚀"):
     if news_input.strip() == "":
         st.warning("⚠️ Warning: Empty string detected. Enter data to scan.")
     else:
-        with st.spinner('Bypassing firewalls... Analyzing data with AI...'):
+        with st.spinner('Bypassing firewalls... Connecting strictly to Gemini AI...'):
             st.markdown('<div class="scanner-bar"></div>', unsafe_allow_html=True)
             time.sleep(1.5)
             
             try:
+                # API Key Connection
                 GOOGLE_API_KEY = "AQ.Ab8RN6LtRx5ENNumHAduwOqw62FbmRry88j2vQfX8a9PUQiRow"
                 genai.configure(api_key=GOOGLE_API_KEY)
                 model = genai.GenerativeModel('gemini-1.5-flash')
                 
-                # Prompting AI for English, Telugu, and Hindi translations
                 secret_prompt = f"""
                 You are a smart Cybersecurity AI. Analyze the text and return ONLY valid JSON format.
                 Score rules: 90-100 (fraud/scam), 40-60 (promo/ads), 0-20 (safe).
@@ -84,39 +82,16 @@ if st.button("Execute Hack & Analyze 🚀"):
                 
                 clean_text = response.text.replace('```json', '').replace('```', '').strip()
                 st.session_state.ai_data = json.loads(clean_text)
+                st.session_state.show_report = True
                 
             except Exception as e:
-                # Local Fallback with Translations
-                input_lower = news_input.lower()
-                fraud_keywords = ["lottery", "prize", "bank", "otp", "free"]
-                promo_keywords = ["discount", "subscribe", "offer"]
-                
-                if any(word in input_lower for word in fraud_keywords):
-                    spam_p = random.randint(95, 100)
-                    r_en, a_en = "This message contains dangerous words like lottery, OTP, or free money. It is highly likely to be a scam.", "CRITICAL THREAT: Scam Detected."
-                    r_te, a_te = "ఈ సందేశంలో లాటరీ, OTP లేదా ఉచిత డబ్బు లాంటి ప్రమాదకరమైన పదాలు ఉన్నాయి. ఇది మోసం అయ్యే అవకాశం ఉంది.", "ప్రమాద హెచ్చరిక: స్కామ్ కనుగొనబడింది."
-                    r_hi, a_hi = "इस संदेश में लॉटरी, OTP या मुफ्त पैसे जैसे खतरनाक शब्द हैं। यह एक घोटाला होने की अत्यधिक संभावना है।", "महत्वपूर्ण चेतावनी: स्कैम का पता चला।"
-                elif any(word in input_lower for word in promo_keywords):
-                    spam_p = random.randint(40, 60)
-                    r_en, a_en = "This looks like a promotional message or an advertisement.", "CAUTION: Promotional Content."
-                    r_te, a_te = "ఇది ఒక ప్రమోషనల్ మెసేజ్ లేదా ప్రకటన లాగా కనిపిస్తోంది.", "జాగ్రత్త: ఇది ప్రకటనకు సంబంధించినది."
-                    r_hi, a_hi = "यह एक प्रचारात्मक संदेश या विज्ञापन जैसा लगता है।", "सावधान: प्रचारात्मक सामग्री।"
-                else:
-                    spam_p = random.randint(5, 15)
-                    r_en, a_en = "This message looks normal and safe. No dangerous links or words found.", "SECURE: Content is Safe."
-                    r_te, a_te = "ఈ సందేశం సాధారణంగా మరియు సురక్షితంగా కనిపిస్తోంది. ఎలాంటి ప్రమాదకరమైన పదాలు లేవు.", "సురక్షితం: కంటెంట్ సురక్షితమైనది."
-                    r_hi, a_hi = "यह संदेश सामान्य और सुरक्षित लग रहा है। कोई खतरनाक शब्द नहीं मिला।", "सुरक्षित: सामग्री सुरक्षित है।"
-                    
-                st.session_state.ai_data = {
-                    "safe_percentage": 100 - spam_p, "spam_percentage": spam_p,
-                    "reason_en": r_en, "alert_en": a_en,
-                    "reason_te": r_te, "alert_te": a_te,
-                    "reason_hi": r_hi, "alert_hi": a_hi
-                }
-            
-            st.session_state.show_report = True
+                # STRICT ERROR MESSAGE - NO TRICKS
+                st.error("❌ **CRITICAL ERROR: AI Not Found!**")
+                st.warning(f"System failed to connect to Gemini Neural Net. \n\n**Error Log:** {e}")
+                st.session_state.ai_data = None
+                st.session_state.show_report = False
 
-# 7. Output Results with Language Selection
+# 7. Output Results
 if st.session_state.show_report and st.session_state.ai_data:
     ai_data = st.session_state.ai_data
     
@@ -132,7 +107,6 @@ if st.session_state.show_report and st.session_state.ai_data:
     st.progress(ai_data.get('spam_percentage', 100) / 100)
     st.markdown("---")
     
-    # Translation Buttons (Radio)
     lang = st.radio("Select Language / భాష ఎంచుకోండి / भाषा चुनें:", ["English", "తెలుగు", "हिन्दी"], horizontal=True)
     
     if lang == "తెలుగు":
@@ -146,11 +120,8 @@ if st.session_state.show_report and st.session_state.ai_data:
         alert_text = ai_data.get('alert_en', '')
     
     st.markdown("### 📝 AI Scan Summary")
-    
-    # Box 1: Explanation
     st.info(f"**Explanation:**\n\n{reason_text}")
     
-    # Box 2: Alert Message
     spam_val = ai_data.get('spam_percentage', 100)
     if spam_val > 80:
         st.error(f"🚨 **{alert_text}**")
