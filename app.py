@@ -60,8 +60,14 @@ if st.button("Execute Hack & Analyze 🚀"):
                 part2 = "tcStkFCbiqPqdGROmM_tFWRAfEV1MQWsz43A"
                 genai.configure(api_key=part1 + part2)
                 
-                # FIXED: Changed from 'gemini-1.5-flash' to 'gemini-pro' to resolve the 404 error
-                model = genai.GenerativeModel('gemini-pro')
+                # AUTO-DETECT LOGIC: Finds the correct model dynamically!
+                working_model = 'gemini-1.0-pro' # Safe fallback
+                for m in genai.list_models():
+                    if 'generateContent' in m.supported_generation_methods:
+                        working_model = m.name
+                        break
+                        
+                model = genai.GenerativeModel(working_model)
                 
                 secret_prompt = f"""
                 You are a smart Cybersecurity AI. Analyze the text and return ONLY valid JSON format.
@@ -88,7 +94,6 @@ if st.button("Execute Hack & Analyze 🚀"):
                 st.session_state.show_report = True
                 
             except Exception as e:
-                # STRICT ERROR MESSAGE - NO TRICKS
                 st.error("❌ **CRITICAL ERROR: AI Not Found!**")
                 st.warning(f"System failed to connect to Gemini Neural Net. \n\n**Error Log:** {e}")
                 st.session_state.ai_data = None
