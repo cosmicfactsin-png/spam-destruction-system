@@ -1,5 +1,6 @@
 import streamlit as st
-import google.generativeai as genai
+import requests
+import urllib.parse
 import json
 import time
 
@@ -36,57 +37,56 @@ if st.button("Execute Hack & Analyze 🚀"):
     if news_input.strip() == "":
         st.warning("⚠️ Warning: Empty string detected. Enter data to scan.")
     else:
-        with st.spinner('Bypassing firewalls... Connecting strictly to AI Core...'):
+        with st.spinner('Bypassing API Keys... Connecting directly to Open AI Neural Network...'):
             st.markdown('<div class="scanner-bar"></div>', unsafe_allow_html=True)
             time.sleep(1.5)
             
             try:
-                # 1st Priority: Try connecting to Google AI Server
-                part1 = "AQ.Ab8RN6I_nEF4Ts6p1E5xh47e4_"
-                part2 = "3rtjbAdwXDGjSjQM_e-ApWMQ"
-                genai.configure(api_key=part1 + part2)
-                model = genai.GenerativeModel('gemini-1.5-flash')
-                
+                # ==========================================
+                # ZERO API KEY MAGIC (Using Free Pollinations AI)
+                # ==========================================
                 secret_prompt = f"""
-                Analyze the text and return ONLY JSON format. Score rules: 90-100 (fraud), 40-60 (promo), 0-20 (safe).
-                Format: {{"safe_percentage": <int>, "spam_percentage": <int>, "reason_en": "<2 lines>", "alert_en": "<short>", "reason_te": "<telugu>", "alert_te": "<telugu>", "reason_hi": "<hindi>", "alert_hi": "<hindi>"}}
-                Text: {news_input}
+                You are a smart Cybersecurity AI. Analyze the text for spam/phishing.
+                Respond ONLY with a valid JSON object. No explanation, no markdown blocks.
+                Score rules: 90-100 (fraud), 40-60 (promo), 0-20 (safe).
+                Format exactly like this:
+                {{
+                    "safe_percentage": 10,
+                    "spam_percentage": 90,
+                    "reason_en": "Reason in English",
+                    "alert_en": "CRITICAL THREAT DETECTED",
+                    "reason_te": "తెలుగులో కారణం",
+                    "alert_te": "ముప్పు కనుగొనబడింది",
+                    "reason_hi": "हिंदी में कारण",
+                    "alert_hi": "खतरा"
+                }}
+                Text to analyze: {news_input}
                 """
-                response = model.generate_content(secret_prompt)
-                clean_text = response.text.replace('```json', '').replace('```', '').strip()
-                st.session_state.ai_data = json.loads(clean_text)
-                st.session_state.show_report = True
                 
-            except Exception:
-                # 2nd Priority: FAIL-SAFE DEMO MODE FOR COLLEGE PRESENTATION
-                # If API gets blocked, this local logic runs flawlessly without showing any errors.
-                text_lower = news_input.lower()
-                is_spam = any(word in text_lower for word in ['$', 'money', 'free', 'win', 'urgent', 'password', 'click', 'link', 'hiring', 'flexible', 'lottery'])
+                # Encode text for URL
+                encoded_prompt = urllib.parse.quote(secret_prompt)
+                url = f"https://text.pollinations.ai/{encoded_prompt}"
                 
-                if is_spam:
-                    st.session_state.ai_data = {
-                        "safe_percentage": 12,
-                        "spam_percentage": 88,
-                        "reason_en": "The message contains suspicious keywords typical of phishing scams, fake job offers, or financial fraud.",
-                        "alert_en": "CRITICAL THREAT DETECTED",
-                        "reason_te": "ఈ సందేశంలో ఫిషింగ్ స్కామ్‌లు, నకిలీ ఉద్యోగ ఆఫర్లు లేదా ఆర్థిక మోసాలకు సంబంధించిన పదాలు ఉన్నాయి.",
-                        "alert_te": "క్లిష్టమైన ముప్పు కనుగొనబడింది",
-                        "reason_hi": "इस संदेश में फ़िशिंग स्कैम, नकली नौकरी या वित्तीय धोखाधड़ी से संबंधित संदिग्ध शब्द हैं।",
-                        "alert_hi": "गंभीर खतरा पाया गया"
-                    }
+                response = requests.get(url)
+                
+                if response.status_code == 200:
+                    clean_text = response.text.replace('```json', '').replace('```', '').strip()
+                    # Find where JSON actually starts to avoid any extra text
+                    start_idx = clean_text.find('{')
+                    end_idx = clean_text.rfind('}') + 1
+                    json_str = clean_text[start_idx:end_idx]
+                    
+                    st.session_state.ai_data = json.loads(json_str)
+                    st.session_state.show_report = True
+                    st.toast("✅ Connected to Free Open AI Network!", icon="🚀")
                 else:
-                    st.session_state.ai_data = {
-                        "safe_percentage": 95,
-                        "spam_percentage": 5,
-                        "reason_en": "The text appears to be a normal conversation without any malicious links or suspicious financial requests.",
-                        "alert_en": "CONTENT IS SECURE",
-                        "reason_te": "ఈ సందేశం సాధారణంగా ఉంది, ఇందులో ఎలాంటి ప్రమాదకరమైన లింకులు లేదా అనుమానాస్పద అభ్యర్థనలు లేవు.",
-                        "alert_te": "కంటెంట్ సురక్షితమైనది",
-                        "reason_hi": "यह संदेश सामान्य है, इसमें कोई दुर्भावनापूर्ण लिंक या संदिग्ध अनुरोध नहीं है।",
-                        "alert_hi": "सामग्री सुरक्षित है"
-                    }
-                st.session_state.show_report = True
-                st.toast("✅ Internal Backup AI Core Activated", icon="🛡️")
+                    st.error("❌ **CRITICAL ERROR: AI Server Down!**")
+                    st.session_state.show_report = False
+                    
+            except Exception as e:
+                st.error("❌ **CRITICAL ERROR: Scan Failed!**")
+                st.warning(f"Error Log: {e}")
+                st.session_state.show_report = False
 
 # 7. Output Results
 if st.session_state.show_report and st.session_state.ai_data:
